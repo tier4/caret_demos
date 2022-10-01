@@ -140,7 +140,7 @@ public:
   : Node(node_name)
   {
     this->declare_parameter<bool>("use_rosbag", false);
-    bool use_rosbag;
+    bool use_rosbag = false;
     this->get_parameter("use_rosbag", use_rosbag);
     RCLCPP_INFO(this->get_logger(), "use_rosbag = %d", use_rosbag);
     if (use_rosbag) {
