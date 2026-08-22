@@ -24,7 +24,7 @@ int main(int argc, char ** argv)
     node.get(), "/topic3", rclcpp::QoS(10));
 
   auto agnocast_sub = agnocast::create_subscription<std_msgs::msg::String>(
-    node.get(), "/topic2", rclcpp::QoS(10),
+    node.get(), "/topic2", rclcpp::QoS(1),
     [node, agnocast_pub](const agnocast::ipc_shared_ptr<const std_msgs::msg::String> & msg) {
       RCLCPP_INFO(node->get_logger(),
         "[Node3/RelayByPatternA] agnocast sub /topic2 -> agnocast pub /topic3 (%s)",

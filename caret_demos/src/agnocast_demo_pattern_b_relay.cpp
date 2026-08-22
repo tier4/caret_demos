@@ -30,7 +30,7 @@ public:
         agnocast_pub_->publish(std::move(out));
       });
 
-    agnocast_pub_ = this->create_publisher<std_msgs::msg::String>("/topic4", rclcpp::QoS(10));
+    agnocast_pub_ = this->create_publisher<std_msgs::msg::String>("/topic4", rclcpp::QoS(1));
   }
 
 private:

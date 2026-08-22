@@ -41,7 +41,7 @@ public:
 #else
     // Polling subscription (Pattern B, Stage 2: take style)
     polling_sub_ = agnocast::create_subscription<std_msgs::msg::String>(
-      this, "/topic4", rclcpp::QoS(10));
+      this, "/topic4", rclcpp::QoS(1));
 
     timer_ = agnocast::create_timer(
       this, this->get_clock(), 1s,
