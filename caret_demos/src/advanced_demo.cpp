@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
             RCLCPP_INFO(data_serializer_node->get_logger(), "     [Step 3] Data Serializer: Pub Data & Trigger");
         });
 
-    // --- Node 4: Generic Relay ---
+    // --- Node 4: Generic Relay (take_serialized) ---
     auto generic_relay_node = std::make_shared<rclcpp::Node>("generic_relay_node");
     auto pub_relay = generic_relay_node->create_publisher<sensor_msgs::msg::Image>("/image_relay", 10);
 
@@ -73,20 +73,25 @@ int main(int argc, char * argv[]) {
     auto opt_relay = rclcpp::SubscriptionOptions();
     opt_relay.callback_group = group_relay;
     
-    auto sub_data_gen = generic_relay_node->create_subscription<sensor_msgs::msg::Image>(
-        "/image_serialized", 10, [](sensor_msgs::msg::Image::UniquePtr){}, opt_relay);
+    // Use create_generic_subscription to receive SerializedMessage from create_generic_publisher
+    auto sub_data_gen = generic_relay_node->create_generic_subscription(
+        "/image_serialized", "sensor_msgs/msg/Image", 10,
+        [](std::shared_ptr<rclcpp::SerializedMessage>){}, opt_relay);
 
     auto sub_trig = generic_relay_node->create_subscription<sensor_msgs::msg::Image>(
         "/image_trigger", 10, 
         [generic_relay_node, sub_data_gen, pub_relay](sensor_msgs::msg::Image::UniquePtr /*trigger_msg*/) {
             RCLCPP_INFO(generic_relay_node->get_logger(), "       [Step 4] Generic Relay: Triggered by /image_trigger.");
 
-            auto img_msg = std::make_shared<sensor_msgs::msg::Image>();
+            auto ser_msg = std::make_shared<rclcpp::SerializedMessage>();
             rclcpp::MessageInfo info;
             
-            if (sub_data_gen->take(*img_msg, info)) {
-                RCLCPP_INFO(generic_relay_node->get_logger(), "       [Step 4] SUCCESS: Take Success & Pub /image_relay");
-                pub_relay->publish(*img_msg);
+            if (sub_data_gen->take_serialized(*ser_msg, info)) {
+                rclcpp::Serialization<sensor_msgs::msg::Image> ser;
+                sensor_msgs::msg::Image img_msg;
+                ser.deserialize_message(ser_msg.get(), &img_msg);
+                RCLCPP_INFO(generic_relay_node->get_logger(), "       [Step 4] SUCCESS: take_serialized() Success & Pub /image_relay");
+                pub_relay->publish(img_msg);
             }
         });
 
@@ -136,20 +141,32 @@ int main(int argc, char * argv[]) {
             RCLCPP_INFO(intra_take_node->get_logger(),
                 "          [Step 6] Intra Take Node: Topic triggered take(/image_filtered_intra).");
 #ifdef IS_HUMBLE_OR_OLDER
-            // Humble path
+            // Humble path: take() only (IntraProcessWaitable API not available)
             auto img_msg = std::make_shared<sensor_msgs::msg::Image>();
             rclcpp::MessageInfo info;
             if (sub_data_intra->take(*img_msg, info)) {
-                RCLCPP_INFO(intra_take_node->get_logger(), "          [Step 6] SUCCESS: Pub /image_transient_local (Inter-process)");
+                RCLCPP_INFO(intra_take_node->get_logger(), "          [Step 6] SUCCESS: take() -> Pub /image_transient_local (Inter-process)");
                 pub_latched->publish(*img_msg);
             }
 #else
-            // Jazzy path
-            auto ipw = sub_data_intra->get_intra_process_waitable();
-            if (ipw && ipw->is_ready(nullptr)) {
-                auto data = ipw->take_data();
-                if (data && (ipw->execute(data), true)) {
-                    RCLCPP_INFO(intra_take_node->get_logger(), "          [Step 6] SUCCESS: Pub /image_transient_local (Intra-process)");
+            // Jazzy path: test both take() and take_data()+execute()
+            // Pattern A: take_data() + execute() via IntraProcessWaitable
+            {
+                auto ipw = sub_data_intra->get_intra_process_waitable();
+                if (ipw && ipw->is_ready(nullptr)) {
+                    auto data = ipw->take_data();
+                    if (data && (ipw->execute(data), true)) {
+                        RCLCPP_INFO(intra_take_node->get_logger(), "          [Step 6] SUCCESS: take_data()+execute() -> Pub /image_transient_local (Intra-process)");
+                    }
+                }
+            }
+            // Pattern B: take() (also works on Jazzy)
+            {
+                auto img_msg = std::make_shared<sensor_msgs::msg::Image>();
+                rclcpp::MessageInfo info;
+                if (sub_data_intra->take(*img_msg, info)) {
+                    RCLCPP_INFO(intra_take_node->get_logger(), "          [Step 6] SUCCESS: take() -> Pub /image_transient_local");
+                    pub_latched->publish(*img_msg);
                 }
             }
 #endif
