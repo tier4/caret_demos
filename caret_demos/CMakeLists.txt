@@ -14,7 +14,7 @@ include_directories(SYSTEM
   ${rclcpp_INCLUDE_DIRS}
 )
 
-# agnocast デモのビルドオプション（デフォルト OFF）
+# Build option for agnocast demo (default OFF)
 option(BUILD_AGNOCAST_DEMO "Build agnocast demo targets" OFF)
 
 if(BUILD_AGNOCAST_DEMO)
@@ -64,7 +64,7 @@ if(BUILD_AGNOCAST_DEMO)
       ${agnocastlib_INCLUDE_DIRS}
   )
 
-  # --- agnocast: 1プロセス1ノード版 ---
+  # --- agnocast: one node per process ---
   add_executable(agnocast_demo_node1_sensor src/agnocast_demo_node1_sensor.cpp)
   ament_target_dependencies(agnocast_demo_node1_sensor rclcpp sensor_msgs)
 

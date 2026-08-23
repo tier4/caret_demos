@@ -1,47 +1,42 @@
 # CARET Demos
 
-ROS 2 + CARET のトレース・分析を試すためのサンプルプログラム集。
+A collection of sample programs for testing trace and analysis with ROS 2 + CARET.
 
-## サンプル一覧
+## Sample List
 
-| サンプル | 起動コマンド | 説明 |
+| Sample | Launch Command | Description |
 |---------|-------------|------|
-| end_to_end_sample | `ros2 launch caret_demos end_to_end_sample.launch.py` | 基本的な publish/subscribe チェーン |
-| relay | `ros2 launch caret_demos end_to_end_sample_with_relay.launch.py` | relay ノードを含むチェーン |
-| advanced_demo | `ros2 launch caret_demos advanced_demo.launch.py` | 複数ノード構成のデモ |
-| talker_listener | `ros2 launch caret_demos talker_listener.launch.py` | 単純な2ノード通信 |
-| talker_listener_loaned_message | `ros2 launch caret_demos talker_listener_loaned_message.launch.py` | LoanedMessage を使用した通信 |
-| talker_listener_serialized_message | `ros2 launch caret_demos talker_listener_serialized_message.launch.py` | シリアライズメッセージを使用した通信 |
-| multi_talker_listener | `ros2 launch caret_demos multi_talker_listener.launch.py` | 複数 talker/listener |
-| cyclic_pipeline_intra_process | `ros2 launch caret_demos cyclic_pipeline_intra_process.launch.py` | Intra-process 通信の循環パイプライン |
-| agnocast_demo | `ros2 launch caret_demos agnocast_demo.launch.py` | agnocast を使用したデモ（別途ビルドが必要） |
+| end_to_end_sample | `ros2 launch caret_demos end_to_end_sample.launch.py` | Basic publish/subscribe chain |
+| relay | `ros2 launch caret_demos end_to_end_sample_with_relay.launch.py` | Chain with a relay node |
+| advanced_demo | `ros2 launch caret_demos advanced_demo.launch.py` | Multi-node demo |
+| talker_listener | `ros2 launch caret_demos talker_listener.launch.py` | Simple 2-node communication |
+| talker_listener_loaned_message | `ros2 launch caret_demos talker_listener_loaned_message.launch.py` | Communication using LoanedMessage |
+| talker_listener_serialized_message | `ros2 launch caret_demos talker_listener_serialized_message.launch.py` | Communication using serialized messages |
+| multi_talker_listener | `ros2 launch caret_demos multi_talker_listener.launch.py` | Multiple talker/listener |
+| cyclic_pipeline_intra_process | `ros2 launch caret_demos cyclic_pipeline_intra_process.launch.py` | Cyclic pipeline with intra-process communication |
+| agnocast_demo | `ros2 launch caret_demos agnocast_demo.launch.py` | Demo using agnocast (requires separate build) |
 
-## ビルド
+## Build
 
-### 前提
-caret_demos: ~/caret_ws/caret_demos
-caret： ~/ros2_caret_ws
-agnocast: ~/agnocast (with source <caret workspace>)
-
-### 通常ビルド（agnocast 関連は含まない）
+### Default build (without agnocast)
 
 ```bash
 cd ~/caret_ws/caret_demos
 colcon build --symlink-install --packages-select caret_demos
 ```
 
-### agnocast デモを含めてビルド
+### Build with agnocast demo
 
 ```bash
 cd ~/caret_ws/caret_demos
 colcon build --symlink-install --packages-select caret_demos --cmake-args -DBUILD_AGNOCAST_DEMO=ON
 ```
 
-## トレース取得（CARET 使用時）
+## Trace Collection (with CARET)
 
-### 事前準備
+### Prerequisites
 
-CARET のセットアップスクリプトを source し、caret_demos の workspace も source します。
+Source the CARET setup script and the caret_demos workspace.
 
 ```bash
 cd ~/caret_ws/caret_demos
@@ -49,18 +44,18 @@ source ~/ros2_caret_ws/setenv_caret.bash
 source install/local_setup.bash
 ```
 
-### end_to_end_sample の場合
+### end_to_end_sample
 
-**ターミナル1（トレース記録用）:**
+**Terminal 1 (trace recording):**
 ```bash
 cd ~/caret_ws/caret_demos
 source ~/ros2_caret_ws/setenv_caret.bash
 source install/local_setup.bash
 ros2 caret record -v -s my-session
-# "press enter to start..." で待機状態になります
+# Waits for "press enter to start..."
 ```
 
-**ターミナル2（デモ実行用）:**
+**Terminal 2 (run demo):**
 ```bash
 cd ~/caret_ws/caret_demos
 source ~/ros2_caret_ws/setenv_caret.bash
@@ -68,14 +63,14 @@ source install/local_setup.bash
 ros2 launch caret_demos end_to_end_sample.launch.py
 ```
 
-ターミナル2の起動完了後、ターミナル1で Enter を押すとトレースが開始されます。
-停止は Ctrl+C です。トレースデータはデフォルトで `~/.ros/tracing/my-session/` に保存されます。
+After Terminal 2 starts up, press Enter in Terminal 1 to begin tracing.
+Stop with Ctrl+C. Trace data is saved to `~/.ros/tracing/my-session/` by default.
 
-トレースデータの分析は `samples/end_to_end_sample/visualize_result.ipynb` を参照してください。
+See `samples/end_to_end_sample/visualize_result.ipynb` for trace data analysis.
 
-### advanced_demo の場合
+### advanced_demo
 
-**ターミナル1（トレース記録用）:**
+**Terminal 1 (trace recording):**
 ```bash
 cd ~/caret_ws/caret_demos
 source ~/ros2_caret_ws/setenv_caret.bash
@@ -83,7 +78,7 @@ source install/local_setup.bash
 ros2 caret record -v -s advanced-session
 ```
 
-**ターミナル2（デモ実行用）:**
+**Terminal 2 (run demo):**
 ```bash
 cd ~/caret_ws/caret_demos
 source ~/ros2_caret_ws/setenv_caret.bash
@@ -91,15 +86,15 @@ source install/local_setup.bash
 ros2 launch caret_demos advanced_demo.launch.py
 ```
 
-### agnocast_demo の場合
+### agnocast_demo
 
-agnocast は独自の LD_PRELOAD（`libagnocast_heaphook.so`）を使用します。
-CARET の `libcaret.so` と両方をプリロードする必要があります。
+agnocast uses its own LD_PRELOAD (`libagnocast_heaphook.so`).
+Both CARET's `libcaret.so` and agnocast's `libagnocast_heaphook.so` must be preloaded.
 
-また、agnocast の `local_setup.bash` を source すると `LD_PRELOAD` の影響で `dirname` 等のコマンドが壊れるため、
-事前に `unset LD_PRELOAD` してから source し、最後に `LD_PRELOAD` を設定します。
+When sourcing agnocast's `local_setup.bash`, commands like `dirname` can break due to LD_PRELOAD.
+To avoid this, `unset LD_PRELOAD` before sourcing, and set `LD_PRELOAD` at the end.
 
-**ターミナル1（トレース記録用）:**
+**Terminal 1 (trace recording):**
 ```bash
 cd ~/caret_ws/caret_demos
 source ~/ros2_caret_ws/setenv_caret.bash
@@ -107,7 +102,7 @@ source install/local_setup.bash
 ros2 caret record -v -s agnocast-session
 ```
 
-**ターミナル2（デモ実行用）:**
+**Terminal 2 (run demo):**
 ```bash
 cd ~/caret_ws/caret_demos
 unset LD_PRELOAD
@@ -115,17 +110,17 @@ source ~/ros2_caret_ws/setenv_caret.bash
 source ~/agnocast/install/local_setup.bash
 source install/local_setup.bash
 export LD_PRELOAD=$HOME/agnocast/install/agnocastlib/lib/libagnocast_heaphook.so:$LD_PRELOAD
-# 確認（libagnocast_heaphook.so:libcaret.so の順で両方含まれていること）
+# Verify: both libagnocast_heaphook.so and libcaret.so should be present, in that order
 echo $LD_PRELOAD
 ros2 launch caret_demos agnocast_demo.launch.py
 ```
 
-## 環境
+## Environment
 
 - ROS 2 Humble / Jazzy
 - CARET
-- agnocast（オプション）
+- agnocast (optional)
 
-## ライセンス
+## License
 
-[LICENSE](LICENSE) を参照してください。
+See [LICENSE](LICENSE).
