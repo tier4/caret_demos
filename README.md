@@ -18,72 +18,68 @@ A collection of sample programs for testing trace and analysis with ROS 2 + CARE
 
 ## Build
 
+### Setup
+
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+git clone https://github.com/tier4/caret_demos.git src/caret_demos
+
+source /opt/ros/jazzy/setup.bash
+```
+
 ### Default build (without agnocast)
 
 ```bash
-cd ~/caret_ws/caret_demos
 colcon build --symlink-install --packages-select caret_demos
 ```
 
 ### Build with agnocast demo
 
 ```bash
-cd ~/caret_ws/caret_demos
 colcon build --symlink-install --packages-select caret_demos --cmake-args -DBUILD_AGNOCAST_DEMO=ON
 ```
 
 ## Trace Collection (with CARET)
 
-### Prerequisites
-
-Source the CARET setup script and the caret_demos workspace.
-
-```bash
-cd ~/caret_ws/caret_demos
-source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
-```
-
 ### end_to_end_sample
 
-**Terminal 1 (trace recording):**
+**Terminal 1 (run demo):**
 ```bash
-cd ~/caret_ws/caret_demos
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
-ros2 caret record -v -s my-session
-# Waits for "press enter to start..."
-```
-
-**Terminal 2 (run demo):**
-```bash
-cd ~/caret_ws/caret_demos
-source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
+source ~/ros2_ws/install/local_setup.bash
 ros2 launch caret_demos end_to_end_sample.launch.py
 ```
 
-After Terminal 2 starts up, press Enter in Terminal 1 to begin tracing.
-Stop with Ctrl+C. Trace data is saved to `~/.ros/tracing/my-session/` by default.
+**Terminal 2 (trace recording):**
+```bash
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_caret_ws/install/local_setup.bash
+ros2 caret record -v -s e2e-session
+# Waits for "press enter to start..."
+```
+
+After Terminal 1 starts up, press Enter in Terminal 2 to begin tracing.
+Stop with Ctrl+C. Trace data is saved to `~/.ros/tracing/e2e-session/` by default.
 
 See `samples/end_to_end_sample/visualize_result.ipynb` for trace data analysis.
 
 ### advanced_demo
 
-**Terminal 1 (trace recording):**
+**Terminal 1 (run demo):**
 ```bash
-cd ~/caret_ws/caret_demos
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
-ros2 caret record -v -s advanced-session
+source ~/ros2_ws/install/local_setup.bash
+ros2 launch caret_demos advanced_demo.launch.py
 ```
 
-**Terminal 2 (run demo):**
+**Terminal 2 (trace recording):**
 ```bash
-cd ~/caret_ws/caret_demos
-source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
-ros2 launch caret_demos advanced_demo.launch.py
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_caret_ws/install/local_setup.bash
+ros2 caret record -v -s advanced-session
 ```
 
 ### agnocast_demo
@@ -94,26 +90,47 @@ Both CARET's `libcaret.so` and agnocast's `libagnocast_heaphook.so` must be prel
 When sourcing agnocast's `local_setup.bash`, commands like `dirname` can break due to LD_PRELOAD.
 To avoid this, `unset LD_PRELOAD` before sourcing, and set `LD_PRELOAD` at the end.
 
-**Terminal 1 (trace recording):**
-```bash
-cd ~/caret_ws/caret_demos
-source ~/ros2_caret_ws/setenv_caret.bash
-source install/local_setup.bash
-ros2 caret record -v -s agnocast-session
-```
+The “agnocast” package assumes that the source code has been installed in "~/agnocast" directory.
+(See https://github.com/autowarefoundation/agnocast)
 
-**Terminal 2 (run demo):**
+**Terminal 1 (run demo):**
 ```bash
-cd ~/caret_ws/caret_demos
 unset LD_PRELOAD
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
 source ~/agnocast/install/local_setup.bash
-source install/local_setup.bash
+source ~/ros2_ws/install/local_setup.bash
 export LD_PRELOAD=$HOME/agnocast/install/agnocastlib/lib/libagnocast_heaphook.so:$LD_PRELOAD
 # Verify: both libagnocast_heaphook.so and libcaret.so should be present, in that order
 echo $LD_PRELOAD
 ros2 launch caret_demos agnocast_demo.launch.py
 ```
+
+**Terminal 2 (trace recording):**
+```bash
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_caret_ws/install/local_setup.bash
+ros2 caret record -v -s agnocast-session
+```
+
+## Analysis
+
+#### For Analysis of end_to_end_demo
+samples/jupyter/e2e_demo.ipynb
+
+#### For Analysis of advanced_demo
+samples/jupyter/advanced_demo.ipynb
+
+#### For Analysis of agnocast_demo
+samples/jupyter/agnocast_demo.ipynb
+
+In the second cell of the notebook,
+```
+tracing_log_path = [
+    ‘<path/to/caret_trace_data>’
+],
+```
+so please set the full path to the collected trace files.
 
 ## Environment
 
