@@ -18,31 +18,33 @@ A collection of sample programs for testing trace and analysis with ROS 2 + CARE
 
 ## Build
 
-### Setup
+Please follow the instructions in caret_doc (See https://tier4.github.io/caret_doc/main/tutorials/recording/)
+
+
+### Default build (without agnocast)
+
+You can build “end_to_end_demo” and “advanced_demo.”
 
 ```bash
 mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
+
 git clone https://github.com/tier4/caret_demos.git src/caret_demos
 
 source /opt/ros/jazzy/setup.bash
-```
 
-### Default build (without agnocast)
-
-```bash
-colcon build --symlink-install --packages-select caret_demos
+colcon build --symlink-install --packages-up-to caret_demos --cmake-args -DBUILD_TESTING=OFF
 ```
 
 ### Build with agnocast demo
 
 ```bash
-colcon build --symlink-install --packages-select caret_demos --cmake-args -DBUILD_AGNOCAST_DEMO=ON
+colcon build --symlink-install --packages-up-to caret_demos --cmake-args -DBUILD_TESTING=OFF -DBUILD_AGNOCAST_DEMO=ON
 ```
 
 ## Trace Collection (with CARET)
 
-### end_to_end_sample
+### end_to_end_demo
 
 **Terminal 1 (run demo):**
 ```bash
