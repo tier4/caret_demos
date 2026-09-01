@@ -48,7 +48,6 @@ colcon build --symlink-install --packages-up-to caret_demos --cmake-args -DBUILD
 
 **Terminal 1 (run demo):**
 ```bash
-source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
 source ~/ros2_ws/install/local_setup.bash
 ros2 launch caret_demos end_to_end_sample.launch.py
@@ -71,7 +70,6 @@ See `samples/end_to_end_sample/visualize_result.ipynb` for trace data analysis.
 
 **Terminal 1 (run demo):**
 ```bash
-source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
 source ~/ros2_ws/install/local_setup.bash
 ros2 launch caret_demos advanced_demo.launch.py
@@ -98,7 +96,6 @@ The “agnocast” package assumes that the source code has been installed in "~
 **Terminal 1 (run demo):**
 ```bash
 unset LD_PRELOAD
-source /opt/ros/jazzy/setup.bash
 source ~/ros2_caret_ws/setenv_caret.bash
 source ~/agnocast/install/local_setup.bash
 source ~/ros2_ws/install/local_setup.bash
